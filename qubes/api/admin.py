@@ -767,11 +767,11 @@ class QubesAdminAPI(qubes.api.AbstractQubesAPI):
 
         self.enforce("name" in untrusted_pool_config)
 
-        if "volume_group" not in qubes.storage.pool_drivers():
+        if "volume_group" not in untrusted_pool_config:
             raise qubes.exc.QubesException(
                 "Volume group needed. You can specify it by adding: volume_group=<vg_name> "
             )
-        if "thin_pool" not in qubes.storage.pool_drivers():
+        if "thin_pool" not in untrusted_pool_config:
             raise qubes.exc.QubesException(
                 "Thin pool needed. You can specify it by adding: thin_pool=<thin_pool_name> "
             )
