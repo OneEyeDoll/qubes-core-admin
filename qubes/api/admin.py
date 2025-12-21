@@ -766,6 +766,20 @@ class QubesAdminAPI(qubes.api.AbstractQubesAPI):
         untrusted_pool_config = dict(untrusted_pool_config)
 
         self.enforce("name" in untrusted_pool_config)
+
+        if "volume_group" not in qubes.storage.pool_drivers():
+            raise qubes.exc.QubesException(
+                "Volume group needed. You can specify it by adding: volume_group=<vg_name> "
+            )
+        if "thin_pool" not in qubes.storage.pool_drivers():
+            raise qubes.exc.QubesException(
+                "Thin pool needed. You can specify it by adding: thin_pool=<thin_pool_name> "
+            )
+
+        if self.arg not in qubes.storage.pool_drivers():
+            raise qubes.exc.QubesException(
+                "unexpected driver name: " + self.arg
+            )
         untrusted_pool_name = untrusted_pool_config.pop("name")
         allowed_chars = string.ascii_letters + string.digits + "-_."
         self.enforce(all(c in allowed_chars for c in untrusted_pool_name))
