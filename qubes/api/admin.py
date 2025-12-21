@@ -681,7 +681,7 @@ class QubesAdminAPI(qubes.api.AbstractQubesAPI):
 
         return "".join(
             "{} {}\n".format(
-                driver, " ".join(qubes.storage.driver_parameters(driver))
+                driver, " ".join(qubes.storage.driver_parameters(driver).keys())
             )
             for driver in drivers
         )
@@ -767,15 +767,6 @@ class QubesAdminAPI(qubes.api.AbstractQubesAPI):
 
         self.enforce("name" in untrusted_pool_config)
 
-        if "volume_group" not in untrusted_pool_config:
-            raise qubes.exc.QubesException(
-                "Volume group needed. You can specify it by adding: volume_group=<vg_name> "
-            )
-        if "thin_pool" not in untrusted_pool_config:
-            raise qubes.exc.QubesException(
-                "Thin pool needed. You can specify it by adding: thin_pool=<thin_pool_name> "
-            )
-
         if self.arg not in qubes.storage.pool_drivers():
             raise qubes.exc.QubesException(
                 "unexpected driver name: " + self.arg
@@ -787,12 +778,22 @@ class QubesAdminAPI(qubes.api.AbstractQubesAPI):
         self.enforce(pool_name not in self.app.pools)
 
         driver_parameters = qubes.storage.driver_parameters(self.arg)
+        dp_names = driver_parameters.keys()
         unexpected_parameters = [
             key for key in untrusted_pool_config if key not in driver_parameters
         ]
         if unexpected_parameters:
             raise qubes.exc.QubesException(
                 "unexpected driver options: " + " ".join(unexpected_parameters)
+            )
+        
+        required_parameters unmet = [
+                key for key in dp_names if driver_parameters[key] and key not in untrusted_pool_config
+        ]
+        if required_parameters_unmet:
+            raise qubes.exc.QubesException(
+                 "missing required driver options: " + " ".join(join_required_paramets_unmet)
+   
             )
         pool_config = untrusted_pool_config
 
